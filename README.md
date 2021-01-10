@@ -33,3 +33,10 @@ If Gekko helped you in any way, you can always leave me a tip at (BTC) 13r1jyivi
 ### [Gekko Indicators](https://gekko.wizb.it/docs/strategies/gekko_indicators.html)
 ### [TaLib Indicators](https://gekko.wizb.it/docs/strategies/talib_indicators.html)
 ### [Tulib Indicators](https://gekko.wizb.it/docs/strategies/tulip_indicators.html)
+
+
+# Other Stuff....
+
+### angle-between-points
+
+https://www.npmjs.com/package/angle-between-points
