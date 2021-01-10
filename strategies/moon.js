@@ -7,6 +7,13 @@ var angleBetweenPoints = require('angle-between-points');
 var lastCandle = null;
 var firstRun = true;
 
+const arrayEMA7 = [];
+const arrayDEMA10 = [];
+const arrayTEMA10 = [];
+const arrayEMA30 = [];
+
+const MAX_CANDLE = 10;
+const LOG_ACTIVE_0 = true;
 
 // Prepare everything our strat needs
 strat.init = function() {
@@ -46,34 +53,78 @@ strat.log = function() {
 // update or not.
 strat.check = function(candle) {
 
-  console.log('-------------------------- ', this.candle.start, ' --------------------------');
+  console.log('XXXXXXXXXXXXXXXXXXX ', this.candle.start, ' XXXXXXXXXXXXXXXXXXX');
 
-  console.log('EMA7 - ', this.tulipIndicators.ema7.result.result)
-  console.log('DEMA10 - ', this.talibIndicators.dema10.result.outReal)
-  console.log('TEMA10 - ', this.talibIndicators.tema10.result.outReal)
-  console.log('EMA30 - ', this.tulipIndicators.ema30.result.result)
+  // reduce the actual size, prevent memory leak
+  if(arrayEMA7.length == MAX_CANDLE) {
+    arrayEMA7.shift();
+    arrayDEMA10.shift();
+    arrayTEMA10.shift();
+    arrayEMA30.shift();
+  }
 
-  console.log(this.candle);
+  arrayEMA7.push(this.tulipIndicators.ema7.result.result);
+  arrayDEMA10.push(this.talibIndicators.dema10.result.outReal);
+  arrayTEMA10.push(this.talibIndicators.tema10.result.outReal);
+  arrayEMA30.push(this.tulipIndicators.ema30.result.result);
+
+  if(LOG_ACTIVE_0) {
+    console.log('.................. all trends ..................');
+    console.log('EMA7 - ', this.tulipIndicators.ema7.result.result);
+    console.log('DEMA10 - ', this.talibIndicators.dema10.result.outReal);
+    console.log('TEMA10 - ', this.talibIndicators.tema10.result.outReal);
+    console.log('EMA30 - ', this.tulipIndicators.ema30.result.result);
+    console.log('.................. actual arrayEMA7 ..................');
+    arrayEMA7.forEach((element) => {
+      console.log(element);
+    });
+    console.log('.................. actual arrayDEMA10 ..................');
+    arrayDEMA10.forEach((element) => {
+      console.log(element);
+    });
+    console.log('.................. actual arrayTEMA10 ..................');
+    arrayTEMA10.forEach((element) => {
+      console.log(element);
+    });
+    console.log('.................. actual arrayEMA30 ..................');
+    arrayEMA30.forEach((element) => {
+      console.log(element);
+    });
+  }
+
+
+  /*
+  this.arrayDEMA10.push(this.tulipIndicators.dema10.result.outReal);
+  this.arrayTEMA10.push(this.tulipIndicators.tema10).result.outReal;
+  this.arrayEMA30.push(this.tulipIndicators.ema30.result.result);
+  */
 
   var ema7 = this.tulipIndicators.ema7.result.result;
   var dema10 = this.talibIndicators.dema10.result.result;
   var tema10 = this.talibIndicators.tema10.result.result;
   var ema30 = this.tulipIndicators.ema30.result.result;
 
-  if(firstRun){
-    firstRun = false;
-  } else {
-    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-    console.log(lastCandle);
-    console.log(this.candle);
-    console.log('lastCandle CLOSE: ', lastCandle.close);
-    console.log('actualCandle CLOSE: ', this.candle.close);
-    console.log('lastCandle START: ', lastCandle.start);
-    console.log('actualCandle START: ', this.candle.start);
-    console.log('timeBetweenPoints: ', secondsBetweenPointsAsMoment(lastCandle.start, this.candle.start));
-    console.log('percent between point: ', relDiff(lastCandle.close, this.candle.close));
-    console.log('calculateAngleCandle: : ', calculateAngleCandle(lastCandle, this.candle));
-    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+  if(LOG_ACTIVE_0) {
+    if(firstRun){
+      firstRun = false;
+    } else {
+      console.log('.................. last candle ..................');
+      console.log(lastCandle);
+      console.log('.................. actual candle ..................');
+      console.log(this.candle);
+      console.log('.................. candle timings / data ..................');
+      console.log('lastCandle CLOSE: ', lastCandle.close);
+      console.log('actualCandle CLOSE: ', this.candle.close);
+      console.log('lastCandle START: ', lastCandle.start);
+      console.log('actualCandle START: ', this.candle.start);
+      console.log('timeBetweenPoints: ', secondsBetweenPointsAsMoment(lastCandle.start, this.candle.start));
+      console.log('percent between point: ', relDiff(lastCandle.close, this.candle.close));
+      console.log('calculateAngleCandle: : ', calculateAngleCandle(lastCandle, this.candle));
+      console.log('===========================================================================');
+      console.log('========================= NEXT CANDLE NEW DATA ============================');
+      console.log('===========================================================================');
+    }
   }
 
 
@@ -252,4 +303,13 @@ function getActualTrend(data, ){
  *
  *
  * npm trendline https://www.npmjs.com/package/trendline
+ *
+ *
+ *
+ * >> array = [];
+ >> array.push(1);
+ >> array.push(2);
+ >> array.push(3);
+ >> array.shift();  //outputs 1 and removes it from the array
+ https://stackoverflow.com/questions/34622414/fifo-behavior-for-array-pop-in-javascript
  */
