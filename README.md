@@ -25,3 +25,11 @@ Gekko has [a forum](https://forum.gekko.wizb.it/) that is the place for discussi
 ## Final
 
 If Gekko helped you in any way, you can always leave me a tip at (BTC) 13r1jyivitShUiv9FJvjLH7Nh1ZZptumwW
+
+# Basic Knowledge....
+
+![What is this](./ressources/images/indicators-cryptowatch.png)
+
+### [Gekko Indicators](https://gekko.wizb.it/docs/strategies/gekko_indicators.html)
+### [TaLib Indicators](https://gekko.wizb.it/docs/strategies/talib_indicators.html)
+### [Tulib Indicators](https://gekko.wizb.it/docs/strategies/tulip_indicators.html)
