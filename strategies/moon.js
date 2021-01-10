@@ -20,11 +20,13 @@ strat.init = function() {
   // add a Tulip indicator
   // this.addTulipIndicator('name', 'type', parameters);
 
-  this.addTulipIndicator('ema7', 'ema', { optInTimePeriod: 7}); // MIN RANGE
-  this.addTulipIndicator('ema25', 'ema', { optInTimePeriod: 25});
-  this.addTulipIndicator('ema99', 'ema', { optInTimePeriod: 99});
-  this.addTulipIndicator('ema300', 'ema', { optInTimePeriod: 300});
-  this.addTulipIndicator('ema999', 'ema', { optInTimePeriod: 999}); // MAX RANGE
+  this.addTulipIndicator('ema7', 'ema', { optInTimePeriod: 7}); //
+
+  this.addTalibIndicator('dema10', 'dema', { optInTimePeriod: 10}); //
+  this.addTalibIndicator('tema10', 'tema', { optInTimePeriod: 10}); //
+
+  this.addTulipIndicator('ema30', 'ema', { optInTimePeriod: 30}); // ROOT TREND
+
 
   let candleProps = this.asyncIndicatorRunner.candleProps
 }
@@ -46,26 +48,17 @@ strat.check = function(candle) {
 
   console.log('-------------------------- ', this.candle.start, ' --------------------------');
 
-  console.log('ema7: ', this.tulipIndicators.ema7);
-  console.log('ema25: ', this.tulipIndicators.ema25);
-  console.log('ema99: ', this.tulipIndicators.ema99);
-  console.log('ema300: ', this.tulipIndicators.ema300);
+  console.log('EMA7 - ', this.tulipIndicators.ema7.result.result)
+  console.log('DEMA10 - ', this.talibIndicators.dema10.result.outReal)
+  console.log('TEMA10 - ', this.talibIndicators.tema10.result.outReal)
+  console.log('EMA30 - ', this.tulipIndicators.ema30.result.result)
 
   console.log(this.candle);
 
   var ema7 = this.tulipIndicators.ema7.result.result;
-  var ema25 = this.tulipIndicators.ema25.result.result;
-  var ema99 = this.tulipIndicators.ema99.result.result;
-  var ema300 = this.tulipIndicators.ema300.result.result;
-
-  if (ema7 < ema99) {
-    this.advice('long');
-  } else {
-    this.advice('short');
-  }
-
-
-
+  var dema10 = this.talibIndicators.dema10.result.result;
+  var tema10 = this.talibIndicators.tema10.result.result;
+  var ema30 = this.tulipIndicators.ema30.result.result;
 
   if(firstRun){
     firstRun = false;
@@ -78,26 +71,28 @@ strat.check = function(candle) {
     console.log('lastCandle START: ', lastCandle.start);
     console.log('actualCandle START: ', this.candle.start);
     console.log('timeBetweenPoints: ', secondsBetweenPointsAsMoment(lastCandle.start, this.candle.start));
-    var angle = calculateAngleCandle(lastCandle, this.candle);
-    if(angle > 80) {
-      console.log('calculateAngleCandle: : ', angle, ' 100 MAX');
-    } else if (80 >= angle > 60) {
-      console.log('calculateAngleCandle: : ', angle, ' 80');
-    } else if (60 >= angle > 40) {
-      console.log('calculateAngleCandle: : ', angle, ' 60');
-    }else if (40 >= angle > 20) {
-      console.log('calculateAngleCandle: : ', angle, ' 20');
-    }else if (20 >= angle ) {
-      console.log('calculateAngleCandle: : ', angle, ' LOW');
-    }
+    console.log('percent between point: ', relDiff(lastCandle.close, this.candle.close));
+    console.log('calculateAngleCandle: : ', calculateAngleCandle(lastCandle, this.candle));
     console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
   }
 
 
+  // ERSTER BUY
+  // Wenn Tief erreicht und x prozent unter EMA30
+  // - Wenn also vorher fallen und nun steigend -> zwischenspeichern
+  // - Wenn ab Tief über letzte 5 kerze steigend und tief max 5 kerzen her und jetzt stark steigend (dema10 und EMA10) dann BUY
+
+
+  // ERSTER SELL
+  // Wenn vorhergies tief wieder erreich (einfach erstmal)
+  // Oder wenn kurs von EMA10 oder DEMA10 nicht mehr steigend (erstmal einfach)
 
   lastCandle = this.candle;
-
 }
+
+/** ****************************************************************************
+ *                   Zusatzfunktionen !!!
+ * ****************************************************************************/
 
 // Optional for executing code
 // after completion of a backtest.
@@ -141,7 +136,7 @@ function calculateAngleCandle(candleA, candleB) {
 
   var xBMultiplier = 0.01;
   //var xB = secondsBetweenPointsAsMoment(candleA.start, candleB.start) / dividerHour;
-  var xB = 10;
+  var xB = 60;
   var yB = relDiff(candleA.close, candleB.close) * 100; // Care at this point !!!!
   /**
    * ------ xB ------- mit dividerHour skalierbar
@@ -171,10 +166,36 @@ function secondsBetweenPointsAsMoment(startA, startB) {
 
 function courseUpOrDown(candleA, candleB) {
   if(candleA.close < candleB.close){
-    return -1;
+    return 1;
   }
-  return 1;
+  return -1;
 }
+
+function getActualTrend(data, ){
+  const createTrend = require('trendline');
+
+  const data = [
+    { y: 2, x: 1 },
+    { y: 4, x: 2 },
+    { y: 5, x: 3 },
+    { y: 4, x: 4 },
+    { y: 5, x: 5 },
+  ];
+
+// Takes the following arguments (dataset, xKey, yKey)
+  const trend = createTrend(data, 'x', 'y');
+
+  console.log(trend);
+// { slope: 0.6, yStart: 2.2, calcY: [Function: calcY] }
+}
+
+
+/**
+ * Konzentrier dich auf Ereignisse DROP unter EMA25
+ * - Ab wieviel Prozent eregnisse in welcher Zeit ?
+ *
+ *
+ */
 
 
 /**
@@ -227,4 +248,8 @@ function courseUpOrDown(candleA, candleB) {
  *
  *
  * Struct erstellen zu jeder EMA den Winkel und Upper or Under erstellen
+ *
+ *
+ *
+ * npm trendline https://www.npmjs.com/package/trendline
  */
